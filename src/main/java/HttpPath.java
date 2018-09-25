@@ -1,19 +1,28 @@
-import java.util.function.IntPredicate;
+
 
 public class HttpPath {
+	
+	private String requestUri;
 
-	public HttpPath(String string) {
-		// TODO Auto-generated constructor stub
-	}
+    public HttpPath(String requestUri) {
+        this.requestUri = requestUri;
+    }
 
-	public IntPredicate getPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public String getPath() {
+        return getQuestionPos() != -1 ? requestUri.substring(0, getQuestionPos()) : requestUri;
+    }
 
-	public Object getQuery() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private int getQuestionPos() {
+        return requestUri.indexOf("?");
+    }
+
+    public HttpQuery getQuery() {
+            return getQuestionPos() != -1 ? new HttpQuery(requestUri.substring(getQuestionPos()+1)) : null;
+    }
+
+    public String toString() {
+        HttpQuery query = getQuery();
+        return getPath() + (query != null ? "?" + query : "");
+    }
 
 }
