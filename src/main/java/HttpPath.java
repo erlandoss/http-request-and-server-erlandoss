@@ -24,5 +24,4 @@ public class HttpPath {
         HttpQuery query = getQuery();
         return getPath() + (query != null ? "?" + query : "");
     }
-
 }

@@ -18,8 +18,11 @@ public class HttpEchoServer {
 
     public void runServer() {
         while (true) {
+        	
+        	Socket socket = null;
+        	
             try {
-                Socket socket = serverSocket.accept();
+                socket = serverSocket.accept();
 
                 String uri = readLine(socket).split(" ")[1];
 

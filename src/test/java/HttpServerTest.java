@@ -52,7 +52,8 @@ public class HttpServerTest {
         assertThat(response.getBody()).isEqualTo("Hello world!");
     }
 
-    public static void main(String[] args) throws IOException {
+    @Test
+    public void main() throws IOException {
         try(ServerSocket serverSocket = new ServerSocket(10080)) {
             Socket socket = serverSocket.accept();
             socket.getOutputStream().write(("HTTP/1.1 200 OK\r\n").getBytes());
