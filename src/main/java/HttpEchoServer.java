@@ -55,7 +55,6 @@ public class HttpEchoServer {
 			else {
 				statusCode = "200";
 			}
-		
 			if (uri.contains("body")) {
 				body = path.getQuery().getParameter("body");
 			}
