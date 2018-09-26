@@ -10,20 +10,21 @@ public class HttpEchoServer {
     private String statusCode;
     private String location; 
     private String body;
-    //Starts the server
 
+    //Starts the server and gives you a port to access it through
     public static void main(String[] args) throws IOException {
         HttpEchoServer server = new HttpEchoServer(0);
         System.out.println("Go to localhost:" + server.getPort());
-
     }
 
+    //Sets serversocket with a port and starts thread
     public HttpEchoServer(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         Thread thread = new Thread(() -> runServer(serverSocket));
         thread.start();
     }
 
+    //Main loop
     public void runServer(ServerSocket serverSocket) {
         while (true) {
             try {
@@ -42,7 +43,7 @@ public class HttpEchoServer {
         }
     }
 
-
+    //Sets the parameters of the query
     private void setQueryParameters(HttpQuery query) {
         if(query != null) {
             this.statusCode = query.getParameter("status");
@@ -56,12 +57,15 @@ public class HttpEchoServer {
             this.location = query.getParameter("Location");
             }
         }
-private void setDefaultParameters() {
+    
+    //Sets some default parameters, experienced nullpointer exceptions without this
+    private void setDefaultParameters() {
         statusCode = "200";
         body = "java4everrrrr";
         location = null;
     }
 
+    //Writes the server response
     private void writeResponse(OutputStream output) throws IOException {
         output.write(("HTTP/1.1 " + statusCode + " OK\r\n").getBytes());
         output.write("Content-Type: text/html; charset=utf-8\r\n".getBytes());
@@ -75,6 +79,7 @@ private void setDefaultParameters() {
         output.flush();
     }
 
+    //Takes a inputstream and returns a string
     public String readLine(InputStream input) throws IOException {
         StringBuilder requestLine = new StringBuilder();
         // Reads the first line
@@ -89,6 +94,7 @@ private void setDefaultParameters() {
         return requestLine.toString();
     }
 
+    //Returns the port the server is running on
     public int getPort() {
         return serverSocket.getLocalPort();
     }
