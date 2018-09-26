@@ -9,9 +9,21 @@ import java.util.Map;
 public class HttpEchoServer {
 
     private ServerSocket serverSocket;
-
+    private String uri;
+	private String statusCode;  
+	private String location; 
+	private String body;
+    
+    //Starts the server
+    public static void main(String[] args) throws IOException {
+        HttpEchoServer server = new HttpEchoServer(0);
+        System.out.println("Go to localhost:" + server.getPort());
+    }
+    
     public HttpEchoServer(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
+    	
+        this.serverSocket = new ServerSocket(port);
+        
         Thread thread = new Thread(() -> runServer());
         thread.start();
     }
@@ -24,52 +36,47 @@ public class HttpEchoServer {
             try {
                 socket = serverSocket.accept();
 
-                String uri = readLine(socket).split(" ")[1];
+                getInput(socket);
 
-                Map<String, String> parameters = readParameters(uri);
-
-                String statusCode = parameters.get("status");
-                if (statusCode == null) {
-                    statusCode = "200";
-                }
-                String body = parameters.get("body");
-                if (body == null) {
-                    body = "Hello world";
-                }
-                String location = parameters.get("Location");
-
-                // Writes the response
-                socket.getOutputStream().write(("HTTP/1.1 " + statusCode + " OK\r\n").getBytes());
-                socket.getOutputStream().write("Content-Type: text/html; charset=utf-8\r\n".getBytes());
-                if (location != null) {
-                    socket.getOutputStream().write(("Location: " + location + "\r\n").getBytes());
-                }
-                socket.getOutputStream().write("Server: Kristiania Java Server!!\r\n".getBytes());
-                socket.getOutputStream().write(("Content-Length: " + body.length() + "\r\n").getBytes());
-                socket.getOutputStream().write("\r\n".getBytes());
-                socket.getOutputStream().write((body + "\r\n").getBytes());
-                socket.getOutputStream().flush();
+                writeResponse(socket);
+                
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public Map<String, String> readParameters(String uri) throws UnsupportedEncodingException {
-        int questionPos = uri.indexOf('?');
-        String query = uri.substring(questionPos+1);
+	private void getInput(Socket socket) throws IOException {
+		
+		this.uri = readLine(socket).split(" ")[1];
+		
+		HttpPath path = new HttpPath(uri);
 
-        Map<String, String> parameters = new HashMap<>();
-        for (String parameter : query.split("&")) {
-            int equalsPos = parameter.indexOf('=');
-            String paramName = URLDecoder.decode(parameter.substring(0, equalsPos), "UTF-8");
-            String paramValue = URLDecoder.decode(parameter.substring(equalsPos+1), "UTF-8");
+		this.statusCode = path.getQuery().getParameter("status");
+		if (statusCode == null) {
+		    statusCode = "200";
+		}
+		this.body = path.getQuery().getParameter("body");
+		if (body == null) {
+		    body = "Hello world";
+		}
+		this.location = path.getQuery().getParameter("Location");
+	}
 
-            parameters.put(paramName, paramValue);
-
-        }
-        return parameters;
-    }
+    
+	private void writeResponse(Socket socket) throws IOException {
+		
+		socket.getOutputStream().write(("HTTP/1.1 " + statusCode + " OK\r\n").getBytes());
+		socket.getOutputStream().write("Content-Type: text/html; charset=utf-8\r\n".getBytes());
+		if (location != null) {
+		    socket.getOutputStream().write(("Location: " + location + "\r\n").getBytes());
+		}
+		socket.getOutputStream().write("Server: Java Server!!\r\n".getBytes());
+		socket.getOutputStream().write(("Content-Length: " + body.length() + "\r\n").getBytes());
+		socket.getOutputStream().write("\r\n".getBytes());
+		socket.getOutputStream().write((body + "\r\n").getBytes());
+		socket.getOutputStream().flush();
+	}
 
     public String readLine(Socket socket) throws IOException {
         StringBuilder requestLine = new StringBuilder();
@@ -86,10 +93,6 @@ public class HttpEchoServer {
         return requestLine.toString();
     }
     
-    public static void main(String[] args) throws IOException {
-        new HttpEchoServer(10080);
-    }
-
     public int getPort() {
         return serverSocket.getLocalPort();
     }
