@@ -1,10 +1,7 @@
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Map;
 
 public class HttpEchoServer {
 
@@ -15,52 +12,60 @@ public class HttpEchoServer {
 	private String body;
     
     //Starts the server
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         HttpEchoServer server = new HttpEchoServer(0);
         System.out.println("Go to localhost:" + server.getPort());
     }
     
-    public HttpEchoServer(int port) throws IOException {
+    public HttpEchoServer(int port) throws IOException, InterruptedException {
     	
         this.serverSocket = new ServerSocket(port);
         
-        Thread thread = new Thread(() -> runServer());
+        Thread thread = new Thread(() -> runServer(serverSocket));
         thread.start();
     }
 
-    public void runServer() {
+    public void runServer(ServerSocket serverSocket) {
         while (true) {
         	
-        	Socket socket = null;
-        	
             try {
-                socket = serverSocket.accept();
-
-                getInput(socket);
-
+                Socket socket = serverSocket.accept();
+                InputStream input = socket.getInputStream();
+                getInput(readLine(input));
                 writeResponse(socket);
+                socket.getOutputStream().flush();
                 
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
         }
     }
 
-	private void getInput(Socket socket) throws IOException {
+	private void getInput(String input) throws IOException {
 		
-		this.uri = readLine(socket).split(" ")[1];
+		if (!input.isEmpty()) {
+			
+			uri = input.split(" ")[1];
 		
-		HttpPath path = new HttpPath(uri);
+			HttpPath path = new HttpPath(uri);
 
-		this.statusCode = path.getQuery().getParameter("status");
-		if (statusCode == null) {
-		    statusCode = "200";
+			if (uri.contains("status")) {
+				statusCode = path.getQuery().getParameter("status");
+			}
+			else {
+				statusCode = "200";
+			}
+		
+			if (uri.contains("body")) {
+				body = path.getQuery().getParameter("body");
+			}
+			else {
+				body = "Hello world";
+			}
+			if (uri.contains("Location")) {
+				location = path.getQuery().getParameter("Location");
+			}
 		}
-		this.body = path.getQuery().getParameter("body");
-		if (body == null) {
-		    body = "Hello world";
-		}
-		this.location = path.getQuery().getParameter("Location");
 	}
 
     
@@ -78,18 +83,22 @@ public class HttpEchoServer {
 		socket.getOutputStream().flush();
 	}
 
-    public String readLine(Socket socket) throws IOException {
-        StringBuilder requestLine = new StringBuilder();
+    public String readLine(InputStream input) throws IOException {
+        
+    	StringBuilder requestLine = new StringBuilder();
 
-        // Reads the first line
         int c;
-        while ((c = socket.getInputStream().read()) != -1) {
+        
+        while ((c = input.read()) != -1) {
             if (c == '\r') {
-                break;
+                input.mark(1);
+                c = input.read();
+                if (c != '\n') {
+                	input.reset();
+                }
             }
             requestLine.append((char)c);
         }
-
         return requestLine.toString();
     }
     

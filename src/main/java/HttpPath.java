@@ -3,13 +3,20 @@
 public class HttpPath {
 	
 	private String requestUri;
+	private int questionPos;
 
     public HttpPath(String requestUri) {
         this.requestUri = requestUri;
+        questionPos = getQuestionPos();
     }
 
     public String getPath() {
-        return getQuestionPos() != -1 ? requestUri.substring(0, getQuestionPos()) : requestUri;
+        if (questionPos != -1) {
+        	return requestUri.substring(0, questionPos);
+        }
+        else {
+        	return requestUri;
+        }
     }
 
     private int getQuestionPos() {
@@ -17,7 +24,12 @@ public class HttpPath {
     }
 
     public HttpQuery getQuery() {
-            return getQuestionPos() != -1 ? new HttpQuery(requestUri.substring(getQuestionPos()+1)) : null;
+        if (questionPos != -1) {
+        	return new HttpQuery(requestUri.substring(questionPos+1));
+        }
+        else {
+        	return null;
+        }
     }
 
     public String toString() {

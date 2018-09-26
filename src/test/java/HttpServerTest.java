@@ -12,7 +12,7 @@ public class HttpServerTest {
     private static HttpEchoServer server;
 
     @BeforeClass
-    public static void startServer() throws IOException {
+    public static void startServer() throws IOException, InterruptedException {
         server = new HttpEchoServer(0);
     }
 
@@ -52,7 +52,7 @@ public class HttpServerTest {
         assertThat(response.getBody()).isEqualTo("Hello world!");
     }
 
-    /*
+    
     @Test
     public void main() throws IOException {
         try(ServerSocket serverSocket = new ServerSocket()) {
@@ -60,11 +60,11 @@ public class HttpServerTest {
             socket.getOutputStream().write(("HTTP/1.1 200 OK\r\n").getBytes());
             socket.getOutputStream().write("Content-Type: text/html; charset=utf-8\r\n".getBytes());
             socket.getOutputStream().write(("Location: http://www.google.com\r\n").getBytes());
-            socket.getOutputStream().write("Server: Kristiania Java Server!!\r\n".getBytes());
+            socket.getOutputStream().write("Server: Java Server!!\r\n".getBytes());
             socket.getOutputStream().write(("Content-Length: 13\r\n").getBytes());
             socket.getOutputStream().write("\r\n".getBytes());
             socket.getOutputStream().write("Hello world!\r\n".getBytes());
         }
-    }*/
+    }
 
 }
