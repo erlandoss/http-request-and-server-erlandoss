@@ -1,9 +1,5 @@
 import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -50,21 +46,6 @@ public class HttpServerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(200);
         assertThat(response.getBody()).isEqualTo("Hello world!");
-    }
-
-    
-    @Test
-    public void main() throws IOException {
-        try(ServerSocket serverSocket = new ServerSocket()) {
-            Socket socket = serverSocket.accept();
-            socket.getOutputStream().write(("HTTP/1.1 200 OK\r\n").getBytes());
-            socket.getOutputStream().write("Content-Type: text/html; charset=utf-8\r\n".getBytes());
-            socket.getOutputStream().write(("Location: http://www.google.com\r\n").getBytes());
-            socket.getOutputStream().write("Server: Java Server!!\r\n".getBytes());
-            socket.getOutputStream().write(("Content-Length: 13\r\n").getBytes());
-            socket.getOutputStream().write("\r\n".getBytes());
-            socket.getOutputStream().write("Hello world!\r\n".getBytes());
-        }
     }
 
 }
