@@ -85,6 +85,10 @@ public class HttpEchoServer {
 
         return requestLine.toString();
     }
+    
+    public static void main(String[] args) throws IOException {
+        new HttpEchoServer(10080);
+    }
 
     public int getPort() {
         return serverSocket.getLocalPort();
